@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FiveM Menu</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: transparent;
+            color: white;
+            overflow: hidden;
+        }
+
+        .menu-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(145deg, rgba(30, 30, 30, 0.95), rgba(50, 50, 50, 0.95));
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            max-height: 600px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .menu-container.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -60%);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        .menu-header {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px 15px 0 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .menu-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .menu-subtitle {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 18px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 0, 0, 0.6);
+            transform: scale(1.1);
+        }
+
+        .menu-content {
+            padding: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .menu-item {
+            background: rgba(255, 255, 255, 0.05);
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-5px);
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .menu-item.danger:hover {
+            border-color: #ff4757;
+            box-shadow: 0 5px 15px rgba(255, 71, 87, 0.3);
+        }
+
+        .menu-item-content {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+
+        .menu-item-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .menu-item-text {
+            flex: 1;
+        }
+
+        .menu-item-title {
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .menu-item-desc {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .menu-item-arrow {
+            font-size: 12px;
+            opacity: 0.5;
+        }
+
+        .toggle-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: none;
+            animation: notifySlide 0.3s ease-out;
+        }
+
+        @keyframes notifySlide {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        .stats-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stats-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <button class="toggle-btn" onclick="toggleMenu()">📋 Menu</button>
+    
+    <div class="notification" id="notification"></div>
+
+    <div class="menu-container" id="menuContainer">
+        <div class="menu-header">
+            <button class="close-btn" onclick="closeMenu()">&times;</button>
+            <div class="menu-title">Player Menu</div>
+            <div class="menu-subtitle">FiveM Advanced Menu</div>
+        </div>
+        
+        <div class="menu-content">
+            <div class="stats-container">
+                <div class="stats-title">Player Stats</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="playerHealth">100</div>
+                        <div class="stat-label">Health</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="playerArmor">50</div>
+                        <div class="stat-label">Armor</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="playerMoney">$1,000</div>
+                        <div class="stat-label">Money</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="playerLevel">15</div>
+                        <div class="stat-label">Level</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-item" onclick="executeAction('heal')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">❤️</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">Heal Player</div>
+                        <div class="menu-item-desc">Restore full health</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="executeAction('armor')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">🛡️</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">Add Armor</div>
+                        <div class="menu-item-desc">Add full armor protection</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="executeAction('weapons')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">💀</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">Give Weapons</div>
+                        <div class="menu-item-desc">Give all weapons</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="executeAction('vehicle')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">🚗</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">Spawn Vehicle</div>
+                        <div class="menu-item-desc">Spawn a fast car</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="executeAction('teleport')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">🚀</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">Teleport</div>
+                        <div class="menu-item-desc">Teleport to location</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="executeAction('invisible')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">👻</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">Toggle Invisible</div>
+                        <div class="menu-item-desc">Enable/disable invisibility</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+
+            <div class="menu-item" onclick="executeAction('godmode')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">⚡</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">God Mode</div>
+                        <div class="menu-item-desc">Enable full protection</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+
+            <div class="menu-item danger" onclick="executeAction('suicide')">
+                <div class="menu-item-content">
+                    <div class="menu-item-icon">💥</div>
+                    <div class="menu-item-text">
+                        <div class="menu-item-title">Suicide</div>
+                        <div class="menu-item-desc">End character life</div>
+                    </div>
+                </div>
+                <div class="menu-item-arrow">›</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let menuOpen = false;
+        let playerStats = {
+            health: 100,
+            armor: 50,
+            money: 1000,
+            level: 15
+        };
+
+        function toggleMenu() {
+            const menu = document.getElementById('menuContainer');
+            if (menuOpen) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        function openMenu() {
+            const menu = document.getElementById('menuContainer');
+            menu.classList.add('active');
+            menuOpen = true;
+            updateStats();
+            
+            // Send signal to FiveM that menu is open
+            if (window.invokeNative) {
+                window.invokeNative('setNuiFocus', true, true);
+            }
+        }
+
+        function closeMenu() {
+            const menu = document.getElementById('menuContainer');
+            menu.classList.remove('active');
+            menuOpen = false;
+            
+            // Send signal to FiveM that menu is closed
+            if (window.invokeNative) {
+                window.invokeNative('setNuiFocus', false, false);
+            }
+        }
+
+        function showNotification(message, duration = 3000) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, duration);
+        }
+
+        function updateStats() {
+            document.getElementById('playerHealth').textContent = playerStats.health;
+            document.getElementById('playerArmor').textContent = playerStats.armor;
+            document.getElementById('playerMoney').textContent = `$${playerStats.money.toLocaleString()}`;
+            document.getElementById('playerLevel').textContent = playerStats.level;
+        }
+
+        function executeAction(action) {
+            let message = '';
+            
+            switch(action) {
+                case 'heal':
+                    playerStats.health = 100;
+                    message = 'Health fully restored!';
+                    sendToFiveM('heal_player');
+                    break;
+                    
+                case 'armor':
+                    playerStats.armor = 100;
+                    message = 'Full armor added!';
+                    sendToFiveM('add_armor');
+                    break;
+                    
+                case 'weapons':
+                    message = 'All weapons added!';
+                    sendToFiveM('give_all_weapons');
+                    break;
+                    
+                case 'vehicle':
+                    message = 'Vehicle spawned!';
+                    sendToFiveM('spawn_vehicle', 'adder');
+                    break;
+                    
+                case 'teleport':
+                    message = 'Teleported successfully!';
+                    sendToFiveM('teleport_player', {x: -1037.8, y: -2737.8, z: 20.1});
+                    break;
+                    
+                case 'invisible':
+                    message = 'Invisibility toggled!';
+                    sendToFiveM('toggle_invisible');
+                    break;
+                    
+                case 'godmode':
+                    message = 'God mode activated!';
+                    sendToFiveM('toggle_godmode');
+                    break;
+                    
+                case 'suicide':
+                    message = 'Character killed!';
+                    playerStats.health = 0;
+                    sendToFiveM('suicide_player');
+                    break;
+            }
+            
+            showNotification(message);
+            updateStats();
+        }
+
+        function sendToFiveM(eventName, data = null) {
+            // Send events to FiveM
+            if (window.invokeNative) {
+                if (data) {
+                    window.invokeNative('sendNuiMessage', JSON.stringify({
+                        type: eventName,
+                        data: data
+                    }));
+                } else {
+                    window.invokeNative('sendNuiMessage', JSON.stringify({
+                        type: eventName
+                    }));
+                }
+            }
+            
+            // For local development
+            console.log(`FiveM Event: ${eventName}`, data);
+        }
+
+        // Receive events from FiveM
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            
+            switch(data.type) {
+                case 'updateStats':
+                    playerStats = {...playerStats, ...data.stats};
+                    updateStats();
+                    break;
+                    
+                case 'showNotification':
+                    showNotification(data.message);
+                    break;
+                    
+                case 'toggleMenu':
+                    toggleMenu();
+                    break;
+                    
+                case 'closeMenu':
+                    closeMenu();
+                    break;
+            }
+        });
+
+        // Close menu when ESC is pressed
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && menuOpen) {
+                closeMenu();
+            }
+        });
+
+        // Update stats every second
+        setInterval(updateStats, 1000);
+    </script>
+</body>
+</html>
